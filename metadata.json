@@ -1,0 +1,7 @@
+{
+  "name": "CHẠM VIỆC - Hướng Nghiệp & Tuyển Sinh",
+  "description": "Nền tảng hướng nghiệp và tra cứu ngành, trường, điểm chuẩn cho học sinh lớp 10-12 tại Việt Nam.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
