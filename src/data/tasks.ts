@@ -1,6 +1,197 @@
 import { CareerTask } from '../types';
 
 export const SIMULATION_TASKS: CareerTask[] = [
+  // 1. MARKETING GEN Z TEA CAMPAIGN (New!)
+  {
+    id: 'task-marketing',
+    careerId: 'marketing-specialist',
+    careerTitle: 'Chuyên viên Marketing & Digital Marketing',
+    title: 'Thử thách Marketing: Tung sản phẩm Trà sữa Mới cho Gen Z',
+    durationMinutes: 12,
+    scenario: 'Công ty đồ uống của em chuẩn bị tung ra một dòng trà sữa đóng chai ít đường, sử dụng trà ô long Mộc Châu nguyên chất nhắm vào đối tượng học sinh - sinh viên Gen Z. Với ngân sách quảng cáo 30 triệu đồng cho tuần đầu ra mắt, nhiệm vụ của em là định vị thông điệp cốt lõi và lựa chọn kênh tiếp cận phù hợp.',
+    instructions: [
+      'Giai đoạn 1: Lựa chọn thông điệp truyền thông (Tagline) chạm trúng tâm lý Gen Z.',
+      'Giai đoạn 2: Phân bổ ngân sách quảng cáo giữa TikTok Video ngắn và phát mẫu thử tại cổng trường.',
+      'Giai đoạn 3: Đọc số liệu chuyển đổi và phản ứng dư luận sau 48 giờ mở bán.'
+    ],
+    stages: [
+      {
+        stageNumber: 1,
+        title: 'Giai đoạn 1: Chọn thông điệp truyền thông (Tagline) cho sản phẩm',
+        description: 'Gen Z rất quan tâm đến sức khỏe nhưng không muốn đánh đổi hương vị thơm ngon và tính tiện lợi. Em sẽ chọn thông điệp nào làm kim chỉ nam?',
+        options: [
+          {
+            id: 'mkt-opt-1',
+            label: 'Phương án A: "Sản phẩm bổ dưỡng đạt tiêu chuẩn vệ sinh an toàn thực phẩm số 1 Việt Nam"',
+            reasoning: 'Thông điệp quá khô khan, dùng từ ngữ hành chính nhàm chán, không tạo được cảm xúc hay sự đồng cảm từ giới trẻ.',
+            outcomeDescription: 'Tỷ lệ xem hết video quảng cáo chỉ đạt 1.2%, giới trẻ lướt qua nhanh vì cảm giác như đang đọc thông cáo báo chí.',
+            feedbackTone: 'warning',
+            scoreDelta: 1
+          },
+          {
+            id: 'mkt-opt-2',
+            label: 'Phương án B: "Gu trà đậm vị, ít ngọt chuẩn gu – Nạp mood tỉnh táo cho ngày dài"',
+            reasoning: 'Đánh đúng ngôn ngữ và nhu cầu của Gen Z: giải tỏa căng thẳng (nạp mood), giữ dáng (ít ngọt) và vị trà đậm tự nhiên.',
+            outcomeDescription: 'Tuyệt vời! Video teaser đạt tỷ lệ giữ chân người xem 38%, phần bình luận sôi nổi với hàng trăm bạn trẻ hỏi điểm bán.',
+            feedbackTone: 'positive',
+            scoreDelta: 3
+          },
+          {
+            id: 'mkt-opt-3',
+            label: 'Phương án C: "Uống trà sữa này chắc chắn bạn sẽ thi đỗ đại học thủ khoa"',
+            reasoning: 'Quảng cáo sai sự thật, hứa hẹn viển vông, vi phạm chuẩn mực đạo đức nghề marketing.',
+            outcomeDescription: 'Cộng đồng mạng phản ứng dữ dội và chỉ trích thương hiệu lừa dối, gây khủng hoảng truyền thông ngay ngày đầu ra mắt.',
+            feedbackTone: 'warning',
+            scoreDelta: 0
+          }
+        ]
+      },
+      {
+        stageNumber: 2,
+        title: 'Giai đoạn 2: Phân bổ ngân sách 30 triệu đồng',
+        description: 'Làm thế nào để với ngân sách vừa phải mà tạo được độ phủ sóng cao và kích thích người dùng dùng thử?',
+        options: [
+          {
+            id: 'mkt-opt-4',
+            label: 'Phương án A: Dành 70% ngân sách hợp tác với các bạn học sinh sáng tạo nội dung TikTok (KOCs) review chân thực + 30% phát mẫu thử tại các quầy tiện lợi gần trường học',
+            reasoning: 'Kết hợp hài hòa giữa tạo nhận diện thương hiệu số (Online) và cho khách hàng trực tiếp nếm thử hương vị (Offline).',
+            outcomeDescription: 'Lượng người tìm kiếm tên sản phẩm tăng gấp 5 lần, các điểm bán thử nghiệm cháy hàng chỉ sau 3 ngày.',
+            feedbackTone: 'positive',
+            scoreDelta: 3
+          },
+          {
+            id: 'mkt-opt-5',
+            label: 'Phương án B: Thuê 1 ca sĩ hạng A đăng 1 bài viết trên Facebook với giá 30 triệu đồng',
+            reasoning: 'Chi hết toàn bộ ngân sách cho một bài đăng duy nhất, không còn tiền duy trì hoạt động tiếp theo, rủi ro tương tác ảo cao.',
+            outcomeDescription: 'Bài đăng có nhiều lượt like nhưng hầu hết là fan hâm mộ của ca sĩ, lượng người mua thực tế tại cửa hàng rất thấp.',
+            feedbackTone: 'warning',
+            scoreDelta: 1
+          }
+        ]
+      },
+      {
+        stageNumber: 3,
+        title: 'Giai đoạn 3: Đọc số liệu và cải tiến sản phẩm',
+        description: 'Sau 48 giờ, báo cáo cho thấy: Có 5.000 lượt click vào gian hàng nhưng chỉ có 120 đơn mua. Khảo sát nhanh thấy nhiều bạn chê phí giao hàng quá đắt. Em xử lý thế nào?',
+        options: [
+          {
+            id: 'mkt-opt-6',
+            label: 'Phương án A: Tung chương trình "Mua combo 3 chai tặng Freeship" và liên kết với cửa hàng tạp hóa địa phương để mua trực tiếp không tốn tiền ship',
+            reasoning: 'Giải quyết đúng điểm nghẽn (Pain point) của khách hàng về phí ship, đồng thời kích thích tăng giá trị đơn hàng.',
+            outcomeDescription: 'Tỷ lệ chuyển đổi đơn hàng tăng vọt lên 8.5%, bà con cửa hàng đối tác liên tục xin nhập thêm hàng.',
+            feedbackTone: 'positive',
+            scoreDelta: 3
+          },
+          {
+            id: 'mkt-opt-7',
+            label: 'Phương án B: Tăng gấp đôi ngân sách chạy quảng cáo thêm nhiều người hơn',
+            reasoning: 'Đổ thêm tiền vào một cái phễu đang bị thủng đáy sẽ chỉ làm lãng phí thêm ngân sách công ty.',
+            outcomeDescription: 'Chi phí quảng cáo tăng gấp đôi nhưng số đơn hàng vẫn lẹt đẹt vì rào cản phí ship chưa được giải quyết.',
+            feedbackTone: 'warning',
+            scoreDelta: 1
+          }
+        ]
+      }
+    ],
+    rubric: [
+      { criterion: 'Thấu hiểu tâm lý khách hàng (Customer Insight)', description: 'Biết đặt mình vào suy nghĩ, ngôn ngữ và nhu cầu thực của đối tượng mục tiêu.' },
+      { criterion: 'Tư duy phân bổ ngân sách & đo lường hiệu quả', description: 'Biết cân nhắc chi phí và hiệu quả chuyển đổi, không phung phí tài nguyên.' },
+      { criterion: 'Phản tư năng lực marketing', description: 'Cảm nhận xem bản thân có hứng thú với việc sáng tạo nội dung và theo dõi số liệu không.' }
+    ]
+  },
+
+  // 2. DATA ANALYST SALES PATTERN (New!)
+  {
+    id: 'task-data-analyst',
+    careerId: 'data-analyst',
+    careerTitle: 'Chuyên viên Phân tích Dữ liệu (Data Analyst)',
+    title: 'Thử thách Phân tích: Đọc vị Xu hướng từ Bảng dữ liệu Bán hàng',
+    durationMinutes: 12,
+    scenario: 'Em nhận được bảng số liệu doanh thu 6 tháng đầu năm của chuỗi 15 nhà sách. Giám đốc nhận thấy doanh thu tổng thể giảm 12% so với cùng kỳ năm ngoái và nghi ngờ do nhân viên lười biếng. Là một Data Analyst, nhiệm vụ của em là đào sâu vào dữ liệu để tìm ra nguyên nhân thực sự.',
+    instructions: [
+      'Giai đoạn 1: Phân tách dữ liệu theo nhóm ngành hàng (Sách giáo khoa, Truyện tranh, Dụng cụ học tập, Đồ chơi trí tuệ).',
+      'Giai đoạn 2: Phát hiện quy luật biến động theo thời gian và kênh bán lẻ (Trực tiếp tại cửa hàng vs Mua trên Shopee).',
+      'Giai đoạn 3: Đưa ra đề xuất cải thiện kinh doanh dựa trên bằng chứng số liệu khách quan.'
+    ],
+    stages: [
+      {
+        stageNumber: 1,
+        title: 'Giai đoạn 1: Đào sâu vào nhóm ngành hàng',
+        description: 'Khi phân tích chi tiết doanh thu theo từng mặt hàng, em phát hiện:\n• Sách giáo khoa & Dụng cụ học tập: Tăng trưởng +8%\n• Đồ chơi trí tuệ: Tăng nhẹ +3%\n• Sách văn học & Kỹ năng sống: Giảm mạnh -35%\n\nKết luận ban đầu của em là gì?',
+        options: [
+          {
+            id: 'da-opt-1',
+            label: 'Phương án A: Nguyên nhân sụt giảm không phải do toàn bộ cửa hàng, mà tập trung chủ yếu ở nhóm Sách văn học & Kỹ năng sống',
+            reasoning: 'Tư duy phân rã bài toán (Drill-down): không nhìn vào con số tổng quát mà bóc tách từng phân khúc để thấy rõ mắt xích yếu.',
+            outcomeDescription: 'Chính xác! Giám đốc gật đầu đồng ý rằng việc phạt chung tất cả nhân viên là vội vàng và thiếu cơ sở.',
+            feedbackTone: 'positive',
+            scoreDelta: 3
+          },
+          {
+            id: 'da-opt-2',
+            label: 'Phương án B: Kết luận nhân viên bán sách văn học cố tình không tư vấn cho khách',
+            reasoning: 'Quy chụp cảm tính khi chưa có dữ liệu hành vi người mua hay giá cả thị trường.',
+            outcomeDescription: 'Nhân viên bất bình vì thực tế khách hàng vào quầy đều nói đã đọc thử bản tóm tắt trên mạng rồi.',
+            feedbackTone: 'warning',
+            scoreDelta: 1
+          }
+        ]
+      },
+      {
+        stageNumber: 2,
+        title: 'Giai đoạn 2: Đối chiếu kênh bán hàng và xu hướng giá',
+        description: 'Tiếp tục đối chiếu kênh bán, em thấy: Lượng người ghé nhà sách trực tiếp giảm 25%, nhưng lượng tìm kiếm mua sách trên gian hàng online của công ty lại tăng 40%, tuy nhiên tỷ lệ thoát trang online lên tới 75% vì giá bán online cao hơn các sàn khác 15.000đ/cuốn. Dữ liệu đang nói lên điều gì?',
+        options: [
+          {
+            id: 'da-opt-3',
+            label: 'Phương án A: Độc giả trẻ đang chuyển dịch thói quen sang mua sách online, nhưng đang bỏ sang đối thủ vì chính sách giá trên sàn của công ty chưa cạnh tranh',
+            reasoning: 'Kết nối các manh mối dữ liệu (Traffic giảm + Search online tăng + Thoát trang cao vì chênh lệch giá) thành bức tranh toàn cảnh.',
+            outcomeDescription: 'Một phát hiện đắt giá! Ban giám đốc nhận ra vấn đề nằm ở chiến lược giá trên kênh số hóa chứ không phải chất lượng sách.',
+            feedbackTone: 'positive',
+            scoreDelta: 3
+          },
+          {
+            id: 'da-opt-4',
+            label: 'Phương án B: Đóng cửa toàn bộ gian hàng online để ép khách hàng phải đến cửa hàng truyền thống',
+            reasoning: 'Đi ngược lại xu hướng tiêu dùng số, chỉ khiến khách hàng bỏ đi vĩnh viễn.',
+            outcomeDescription: 'Doanh thu tiếp tục tụt dốc thảm hại vì khách hàng chuyển hẳn sang mua của các nhà sách trực tuyến khác.',
+            feedbackTone: 'warning',
+            scoreDelta: 0
+          }
+        ]
+      },
+      {
+        stageNumber: 3,
+        title: 'Giai đoạn 3: Đề xuất giải pháp bằng Dashboard trực quan',
+        description: 'Trong buổi họp cổ đông, em sẽ trình bày bản báo cáo như thế nào để thuyết phục nhất?',
+        options: [
+          {
+            id: 'da-opt-5',
+            label: 'Phương án A: Trình bày biểu đồ so sánh xu hướng doanh thu Online vs Offline, chỉ ra mức hòa vốn khi cân đối lại giá sàn, và đề xuất tổ chức các buổi ký tặng sách/giao lưu tác giả tại cửa hàng trực tiếp',
+            reasoning: 'Giải pháp toàn diện dựa trên dữ liệu: tối ưu kênh online bằng giá, biến cửa hàng truyền thống thành không gian trải nghiệm văn hóa.',
+            outcomeDescription: 'Hội đồng quản trị vỗ tay tán thưởng và phê duyệt ngay kế hoạch điều chỉnh kinh doanh quý 3!',
+            feedbackTone: 'positive',
+            scoreDelta: 3
+          },
+          {
+            id: 'da-opt-6',
+            label: 'Phương án B: Đọc một danh sách 500 dòng số liệu thô trong bảng Excel mà không có biểu đồ',
+            reasoning: 'Quá tải thông tin, thiếu tính chắt lọc khiến người nghe buồn ngủ và không nắm được thông điệp cốt lõi.',
+            outcomeDescription: 'Các cổ đông cau mày vì không hiểu số liệu đang nói lên điều gì, cuộc họp kết thúc mà không có quyết định nào được đưa ra.',
+            feedbackTone: 'warning',
+            scoreDelta: 1
+          }
+        ]
+      }
+    ],
+    rubric: [
+      { criterion: 'Năng lực phân tích bóc tách số liệu (Drill-down)', description: 'Không dừng lại ở bề mặt, biết phân nhỏ dữ liệu để tìm nguyên nhân gốc rễ.' },
+      { criterion: 'Tư duy liên kết dữ liệu với thực tế kinh doanh', description: 'Hiểu được ý nghĩa thực tiễn đằng sau từng con số biến động.' },
+      { criterion: 'Phản tư năng lực phân tích', description: 'Nhận biết cảm xúc của mình khi kiên nhẫn tìm kiếm câu trả lời từ dữ liệu.' }
+    ]
+  },
+
+  // 3. GIÁO VIÊN THPT
   {
     id: 'task-giao-vien',
     careerId: 'giao-vien-thpt',
@@ -106,6 +297,8 @@ export const SIMULATION_TASKS: CareerTask[] = [
       { criterion: 'Phản tư năng lực bản thân', description: 'Nhận biết cảm xúc của mình khi đứng trước đám đông và xử lý áp lực sư phạm.' }
     ]
   },
+
+  // 4. LẬP TRÌNH VIÊN
   {
     id: 'task-lap-trinh',
     careerId: 'lap-trinh-vien',
@@ -203,6 +396,8 @@ export const SIMULATION_TASKS: CareerTask[] = [
       { criterion: 'Phản tư năng lực lập trình', description: 'Đánh giá mức độ kiên nhẫn khi đọc mã và tìm kiếm nguyên nhân cốt lõi của lỗi.' }
     ]
   },
+
+  // 5. KỸ SƯ XÂY DỰNG
   {
     id: 'task-ky-su',
     careerId: 'ky-su-xay-dung',
@@ -292,6 +487,8 @@ export const SIMULATION_TASKS: CareerTask[] = [
       { criterion: 'Phản tư tính cách nghề nghiệp', description: 'Cảm nhận trách nhiệm nặng nề nhưng đầy ý nghĩa của người kỹ sư công trình.' }
     ]
   },
+
+  // 6. TRUYỀN THÔNG & BÁO CHÍ
   {
     id: 'task-truyen-thong',
     careerId: 'chuyen-vien-truyen-thong',
@@ -381,6 +578,8 @@ export const SIMULATION_TASKS: CareerTask[] = [
       { criterion: 'Phản tư năng lực truyền thông', description: 'Đánh giá khả năng diễn đạt ngắn gọn, logic và sức chịu đựng áp lực dư luận số.' }
     ]
   },
+
+  // 7. KỸ SƯ NÔNG NGHIỆP CÔNG NGHỆ CAO
   {
     id: 'task-nong-nghiep',
     careerId: 'ky-su-nong-nghiep-cnc',
@@ -470,6 +669,8 @@ export const SIMULATION_TASKS: CareerTask[] = [
       { criterion: 'Phản tư tình yêu nghề nông', description: 'Đánh giá sự gắn kết và lòng kiên nhẫn với chu kỳ sinh trưởng của cây trồng.' }
     ]
   },
+
+  // 8. ĐIỀU DƯỠNG & Y TẾ
   {
     id: 'task-y-te',
     careerId: 'dieu-duong-y-te',

@@ -1,32 +1,37 @@
 import { StudentProfile } from '../types';
 
-const STORAGE_KEY = 'cham_viec_student_profile_v1';
+const STORAGE_KEY = 'cham_viec_student_profile_v2';
 
 export const DEFAULT_PROFILE: StudentProfile = {
   id: 'guest_' + Math.random().toString(36).substring(2, 9),
   updatedAt: new Date().toISOString(),
   grade: 'lop_11',
-  favoriteSubjects: ['Toán học', 'Vật lý', 'Tin học'],
+  favoriteSubjects: ['Toán học', 'Tiếng Anh', 'Tin học'],
   academicStrengths: ['Tư duy logic', 'Tự học tốt'],
   activities: ['Tham gia câu lạc bộ STEM', 'Làm việc nhóm'],
   careersExplored: [],
   priorityValues: ['sang-tao', 'on-dinh'],
-  preferredRegions: ['MienBac'],
-  budgetRange: 'Trung bình (15 - 35 triệu/năm)',
+  preferredRegions: ['Miền Bắc'],
+  preferredProvinces: ['Hà Nội'],
+  budgetRange: 'Trung bình (15 - 35 triệu/năm - đại học công lập tự chủ)',
   scholarshipInterest: true,
   notes: '',
-  riasecScores: { R: 6, I: 7, A: 3, S: 4, E: 3, C: 4 },
+  riasecScores: { R: 6, I: 7, A: 4, S: 5, E: 4, C: 4 },
   completedTasks: [],
   savedAdmissions: ['adm-uet-cntt-2024'],
   savedCareers: ['lap-trinh-vien'],
-  savedVideos: ['video-dev-1'],
+  savedMajors: ['cntt'],
+  savedUniversities: ['uet-vnu'],
+  savedVideos: ['story-dev-1'],
+  estimatedScore: 26.5,
+  targetCombinations: ['A00', 'D01'],
   reflections: [
     {
       id: 'ref-demo-1',
       taskId: 'task-lap-trinh',
       date: '2024-11-20',
       title: 'Phản tư sau khi thử sửa lỗi logic hệ thống vé',
-      keyInsights: 'Em nhận ra việc đọc code cần sự cẩn thận từng chi tiết nhỏ. Khi tìm ra lỗi `taiKhoan >= giaVe` em cảm thấy rất vui và nhẹ nhõm.',
+      keyInsights: 'Em nhận ra việc đọc code cần sự cẩn thận từng chi tiết nhỏ. Khi tìm ra lỗi kiểm tra điều kiện số dư em cảm thấy rất vui và nhẹ nhõm.',
       readinessForChallenges: 'Em sẵn sàng ngồi mày mò bài toán khó, nhưng cần chú ý nghỉ ngơi vận động mắt.',
       differencesNoticed: 'Lập trình thực tế không chỉ là gõ máy tính một mình mà cần giao tiếp rất nhiều để hiểu người dùng.',
       nextMicroAction: 'Tuần này em sẽ tự giải thêm 2 bài tập thuật toán đơn giản trên lớp Tin học.'
@@ -42,7 +47,13 @@ export function loadStudentProfile(): StudentProfile {
       return DEFAULT_PROFILE;
     }
     const parsed = JSON.parse(raw);
-    return { ...DEFAULT_PROFILE, ...parsed };
+    return {
+      ...DEFAULT_PROFILE,
+      ...parsed,
+      savedMajors: parsed.savedMajors || [],
+      savedUniversities: parsed.savedUniversities || [],
+      targetCombinations: parsed.targetCombinations || ['A00', 'D01']
+    };
   } catch (err) {
     console.error('Failed to load profile from localStorage', err);
     return DEFAULT_PROFILE;
@@ -80,6 +91,7 @@ export function resetProfile(): StudentProfile {
     careersExplored: [],
     priorityValues: [],
     preferredRegions: [],
+    preferredProvinces: [],
     budgetRange: '',
     scholarshipInterest: false,
     notes: '',
@@ -87,7 +99,11 @@ export function resetProfile(): StudentProfile {
     completedTasks: [],
     savedAdmissions: [],
     savedCareers: [],
+    savedMajors: [],
+    savedUniversities: [],
     savedVideos: [],
+    estimatedScore: undefined,
+    targetCombinations: [],
     reflections: []
   };
   saveStudentProfile(cleanProfile);

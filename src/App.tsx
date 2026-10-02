@@ -14,6 +14,7 @@ import { VideoStoriesView } from './components/VideoStoriesView';
 import { ReportView } from './components/ReportView';
 import { AdminView } from './components/AdminView';
 import { PhuongAssistantModal } from './components/PhuongAssistantModal';
+import { ChamAiChatbot } from './components/ChamAiChatbot';
 import { StudentProfile } from './types';
 import { loadStudentProfile, saveStudentProfile } from './utils/storage';
 import { Sparkles, HeartHandshake, ShieldCheck, HelpCircle } from 'lucide-react';
@@ -24,6 +25,8 @@ export default function App() {
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [selectedMajorFilter, setSelectedMajorFilter] = useState<string | null>(null);
   const [isAssistantOpen, setIsAssistantOpen] = useState(false);
+  const [isChamAiOpen, setIsChamAiOpen] = useState(false);
+  const [chamAiInitialPrompt, setChamAiInitialPrompt] = useState<string | null>(null);
 
   useEffect(() => {
     // Keep local storage synced on change
@@ -42,6 +45,11 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleAskChamAi = (question: string) => {
+    setChamAiInitialPrompt(question);
+    setIsChamAiOpen(true);
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans selection:bg-teal-500 selection:text-white">
       {/* Top Navigation */}
@@ -52,7 +60,7 @@ export default function App() {
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
         profile={profile}
-        onOpenAssistant={() => setIsAssistantOpen(true)}
+        onOpenAssistant={() => setIsChamAiOpen(true)}
       />
 
       {/* Main Content Area */}
@@ -102,6 +110,7 @@ export default function App() {
             profile={profile}
             setProfile={setProfile}
             selectedMajorFilter={selectedMajorFilter}
+            onAskAiAboutSchool={handleAskChamAi}
           />
         )}
 
@@ -122,7 +131,18 @@ export default function App() {
         )}
       </main>
 
-      {/* Assistant Modal */}
+      {/* CHẠM AI — Trợ lý hướng nghiệp (Floating Widget & Popup Drawer) */}
+      <ChamAiChatbot
+        isOpen={isChamAiOpen}
+        onClose={() => setIsChamAiOpen(false)}
+        onOpen={() => setIsChamAiOpen(true)}
+        profile={profile}
+        currentContext={currentTab}
+        initialPrompt={chamAiInitialPrompt}
+        onClearInitialPrompt={() => setChamAiInitialPrompt(null)}
+      />
+
+      {/* Assistant Modal (Cô Phượng) */}
       <PhuongAssistantModal
         isOpen={isAssistantOpen}
         onClose={() => setIsAssistantOpen(false)}

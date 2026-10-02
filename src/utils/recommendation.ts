@@ -1,91 +1,109 @@
-import { ActionPlanItem, Career, RecommendationSnapshot, StudentProfile } from '../types';
+import { ActionPlanItem, Career, MatchScoreBreakdown, RecommendationSnapshot, StudentProfile } from '../types';
 import { CAREERS_DATA } from '../data/careers';
 import { MAJORS_DATA } from '../data/majors';
 import { SIMULATION_TASKS } from '../data/tasks';
 
-export function generateRecommendations(profile: StudentProfile): RecommendationSnapshot {
+export function calculateCareerMatchBreakdown(career: Career, profile: StudentProfile): { total: number; breakdown: MatchScoreBreakdown; hollandReason: string; evidence: string[] } {
   const scores = profile.riasecScores || { R: 0, I: 0, A: 0, S: 0, E: 0, C: 0 };
-  
-  // Sort RIASEC dimensions descending
   const sortedDimensions = (Object.keys(scores) as (keyof typeof scores)[]).sort(
     (a, b) => scores[b] - scores[a]
   );
   const top2Codes = sortedDimensions.slice(0, 2);
 
-  // Score each career based on transparent rule set
+  // 1. Sở thích nghề nghiệp RIASEC (Max 30)
+  let riasecScore = 12; // Baseline
+  let hollandReason = '';
+  const hasTop1 = career.riasecCodes.includes(top2Codes[0]);
+  const hasTop2 = career.riasecCodes.includes(top2Codes[1]);
+
+  if (hasTop1 && hasTop2) {
+    riasecScore = 28;
+    hollandReason = `Hồ sơ của bạn cho thấy sở thích nổi bật trùng khớp với 2 nhóm ${top2Codes[0]} và ${top2Codes[1]} của nghề này.`;
+  } else if (hasTop1 || hasTop2) {
+    riasecScore = 22;
+    const matched = hasTop1 ? top2Codes[0] : top2Codes[1];
+    hollandReason = `Hồ sơ của bạn có điểm số tốt ở nhóm sở thích ${matched}, tương thích một phần với đặc thù nghề.`;
+  } else {
+    riasecScore = 15;
+    hollandReason = `Đây là hướng đi mở rộng giúp bạn khám phá ngoài vùng an toàn hiện tại.`;
+  }
+
+  // 2. Năng lực & Bằng chứng môn học (Max 25)
+  let competencyScore = 12;
+  const evidence: string[] = [];
+  const subjectMatches = profile.favoriteSubjects.filter((s) =>
+    career.highSchoolSubjects ? career.highSchoolSubjects.some((cs) => s.includes(cs) || cs.includes(s)) : false
+  );
+
+  if (subjectMatches.length >= 2) {
+    competencyScore = 24;
+    evidence.push(`Thế mạnh các môn học liên quan: ${subjectMatches.join(', ')}.`);
+  } else if (subjectMatches.length === 1) {
+    competencyScore = 18;
+    evidence.push(`Có nền tảng môn học: ${subjectMatches[0]}.`);
+  } else {
+    competencyScore = 14;
+    evidence.push('Chưa ghi nhận môn học sở trường tương ứng trực tiếp.');
+  }
+
+  // 3. Giá trị nghề nghiệp (Max 20)
+  let valuesScore = 12;
+  if (profile.priorityValues && profile.priorityValues.length > 0) {
+    if (career.category === 'CongNghe' && profile.priorityValues.includes('sang-tao')) valuesScore += 6;
+    if (career.category === 'GiaoDuc' && profile.priorityValues.includes('cong-dong')) valuesScore += 6;
+    if (career.category === 'YTe' && profile.priorityValues.includes('cong-dong')) valuesScore += 6;
+    if (career.category === 'KinhDoanh' && profile.priorityValues.includes('thu-nhap')) valuesScore += 6;
+    if (profile.priorityValues.includes('on-dinh')) valuesScore += 2;
+  }
+  valuesScore = Math.min(valuesScore, 20);
+
+  // 4. Hoạt động & Môn học THPT (Max 15)
+  let subjectsScore = 10;
+  if (profile.academicStrengths && profile.academicStrengths.length > 0) {
+    subjectsScore += 4;
+  }
+  subjectsScore = Math.min(subjectsScore, 15);
+
+  // 5. Môi trường làm việc & Thử nghiệm thực tế (Max 10)
+  let environmentScore = 6;
+  const taskDone = profile.completedTasks.includes(career.simulationTaskId || '');
+  if (taskDone) {
+    environmentScore = 10;
+    evidence.push('Bạn đã trực tiếp làm bài thử vai mô phỏng và lưu lại phản tư cảm nhận.');
+  }
+
+  const total = riasecScore + competencyScore + valuesScore + subjectsScore + environmentScore;
+
+  const breakdown: MatchScoreBreakdown = {
+    riasecScore,
+    competencyScore,
+    valuesScore,
+    subjectsScore,
+    environmentScore,
+    total,
+    explanation: `Điểm số ${total}/100 là chỉ số tham khảo tổng hợp từ 5 thành tố minh bạch: Sở thích RIASEC (${riasecScore}/30), Năng lực & Môn học (${competencyScore}/25), Giá trị nghề nghiệp (${valuesScore}/20), Hoạt động trải nghiệm (${subjectsScore}/15) và Môi trường làm việc (${environmentScore}/10). Không đại diện cho xác suất đỗ đại học hay bảo đảm việc làm.`
+  };
+
+  return { total, breakdown, hollandReason, evidence };
+}
+
+export function generateRecommendations(profile: StudentProfile): RecommendationSnapshot {
   const scoredCareers = CAREERS_DATA.map((career) => {
-    let matchScore = 40; // baseline exploratory
-    const matchReasons: string[] = [];
-    const evidence: string[] = [];
-    const tradeoffs: string[] = [...career.difficultiesAndTradeoffs];
+    const { total, breakdown, hollandReason, evidence } = calculateCareerMatchBreakdown(career, profile);
+    const tradeoffs = [...career.difficultiesAndTradeoffs];
     const missing: string[] = [];
 
-    // 1. Holland compatibility
-    const hasTop1 = career.riasecCodes.includes(top2Codes[0]);
-    const hasTop2 = career.riasecCodes.includes(top2Codes[1]);
-    if (hasTop1 && hasTop2) {
-      matchScore += 30;
-      matchReasons.push(`Phù hợp nổi bật với 2 nhóm sở thích hàng đầu của em: Nhóm ${top2Codes[0]} và Nhóm ${top2Codes[1]}.`);
-    } else if (hasTop1 || hasTop2) {
-      matchScore += 18;
-      const matched = hasTop1 ? top2Codes[0] : top2Codes[1];
-      matchReasons.push(`Giao thoa tốt với nhóm sở thích ${matched} trong bảng khám phá của em.`);
-    } else {
-      matchReasons.push(`Hướng đi mở rộng giúp em thử nghiệm ngoài vùng quen thuộc (chưa có điểm số cao ở nhóm ${career.riasecCodes.join(', ')}).`);
-    }
-
-    // 2. Favorite Subjects evidence
-    const subjectMatches: string[] = [];
-    if (career.category === 'CongNghe') {
-      if (profile.favoriteSubjects.some(s => s.includes('Toán') || s.includes('Tin'))) {
-        subjectMatches.push('Yêu thích môn Toán / Tin học');
-      }
-    } else if (career.category === 'GiaoDuc') {
-      if (profile.favoriteSubjects.some(s => s.includes('Văn') || s.includes('Toán') || s.includes('Anh'))) {
-        subjectMatches.push('Nền tảng tốt ở các môn văn hóa cơ bản');
-      }
-    } else if (career.category === 'KyThuat') {
-      if (profile.favoriteSubjects.some(s => s.includes('Vật lý') || s.includes('Toán'))) {
-        subjectMatches.push('Hứng thú với môn Vật lý và tính toán cơ học');
-      }
-    } else if (career.category === 'YTe' || career.category === 'NongNghiep') {
-      if (profile.favoriteSubjects.some(s => s.includes('Sinh') || s.includes('Hóa'))) {
-        subjectMatches.push('Quan tâm đến môn Sinh học / Hóa học');
-      }
-    } else if (career.category === 'TruyenThong') {
-      if (profile.favoriteSubjects.some(s => s.includes('Văn') || s.includes('Anh') || s.includes('Sử'))) {
-        subjectMatches.push('Thế mạnh môn Ngữ văn / Tiếng Anh');
-      }
-    }
-
-    if (subjectMatches.length > 0) {
-      matchScore += 12;
-      evidence.push(`Bằng chứng môn học: ${subjectMatches.join(', ')}.`);
-    } else {
-      missing.push('Chưa ghi nhận môn học yêu thích trực tiếp tương ứng với nghề này.');
-    }
-
-    // 3. Task completion evidence
-    const taskAttempted = profile.completedTasks.includes(career.simulationTaskId || '');
-    if (taskAttempted) {
-      matchScore += 15;
-      evidence.push('Đã trực tiếp thử nghiệm nhiệm vụ mô phỏng Chạm Nghề và ghi lại phản tư cá nhân.');
-    } else {
-      missing.push('Em chưa làm nhiệm vụ mô phỏng thực tế của nghề này để kiểm chứng cảm nhận.');
-    }
-
-    // 4. Missing profile indicators
     if (!profile.budgetRange) {
-      missing.push('Chưa xác định mức ngân sách gia đình mong muốn.');
+      missing.push('Chưa xác định mức ngân sách học phí mong muốn.');
     }
-    if (profile.preferredRegions.length === 0) {
-      missing.push('Chưa chọn khu vực địa lý ưu tiên học tập (Bắc / Trung / Nam).');
+    if (!profile.preferredRegions || profile.preferredRegions.length === 0) {
+      missing.push('Chưa chọn khu vực địa lý ưu tiên học tập.');
+    }
+    if (!profile.completedTasks.includes(career.simulationTaskId || '')) {
+      missing.push('Chưa thử nhiệm vụ mô phỏng thực tế của nghề này để kiểm chứng cảm nhận.');
     }
 
-    // 5. Linked majors
     const linkedMajors = MAJORS_DATA.filter((m) => career.linkedMajorIds.includes(m.id));
-
-    // Suggested task
     const taskObj = SIMULATION_TASKS.find((t) => t.id === career.simulationTaskId);
     const suggestedTask = taskObj
       ? { id: taskObj.id, title: taskObj.title }
@@ -93,8 +111,9 @@ export function generateRecommendations(profile: StudentProfile): Recommendation
 
     return {
       career,
-      matchScore: Math.min(matchScore, 95),
-      hollandFitReason: matchReasons.join(' '),
+      matchScore: total,
+      breakdown,
+      hollandFitReason: hollandReason,
       evidenceFromProfile: evidence.length > 0 ? evidence : ['Chưa có nhiều bằng chứng học tập cụ thể trong hồ sơ.'],
       valuesTradeoffs: tradeoffs,
       skillsToCultivate: career.coreSkills,
@@ -104,12 +123,12 @@ export function generateRecommendations(profile: StudentProfile): Recommendation
     };
   });
 
-  // Sort by calculated matchScore descending, take top 4
+  // Sort descending by matchScore
   scoredCareers.sort((a, b) => b.matchScore - a.matchScore);
-  const topRecommendations = scoredCareers.slice(0, 4);
+  const topRecommendations = scoredCareers.slice(0, 5);
 
   return {
-    ruleVersion: '1.0.0 (Quy tắc minh bạch - Khám phá có giải thích)',
+    ruleVersion: '2.0.0 (Thuật toán Minh bạch – Có phân rã thành tố)',
     generatedDate: new Date().toISOString(),
     recommendations: topRecommendations
   };
@@ -129,7 +148,7 @@ export function generateActionPlan(profile: StudentProfile): ActionPlanItem[] {
       id: 'plan-30-1',
       timeframe: '30_days',
       title: 'Trải nghiệm 2 nhiệm vụ mô phỏng và xem chuyện nghề thật',
-      description: `Dành 15 phút mỗi tuần để thử sức với 2 nhiệm vụ Chạm Nghề và xem ít nhất 1 video câu chuyện nghề nghiệp thật để quan sát khó khăn thực tế.`,
+      description: `Dành 15 phút mỗi tuần để thử sức với 2 nhiệm vụ Chạm Nghề và xem video câu chuyện nghề nghiệp thật để quan sát khó khăn thực tế.`,
       status: profile.completedTasks.length > 0 ? 'completed' : 'in_progress',
       category: 'explore'
     },
@@ -145,7 +164,7 @@ export function generateActionPlan(profile: StudentProfile): ActionPlanItem[] {
       id: 'plan-60-1',
       timeframe: '60_days',
       title: 'Thực hiện 1 sản phẩm học tập hoặc dự án mini',
-      description: `Tạo một sản phẩm thực tế nhỏ: viết 1 bài phóng sự ngắn, giải 1 chuỗi bài thuật toán, làm 1 thí nghiệm sinh học hoặc làm bài thuyết trình STEM.`,
+      description: `Tạo một sản phẩm thực tế nhỏ: viết 1 bài phóng sự ngắn, giải 1 chuỗi bài thuật toán, làm 1 phân tích số liệu hoặc thuyết trình STEM.`,
       status: 'pending',
       category: 'skill'
     },
