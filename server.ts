@@ -77,9 +77,62 @@ function generateSmartOfflineReply(message: string, profile: any): string {
   const cleanMsg = cleanVietnamese(message);
   const msgLower = (message || '').toLowerCase();
 
-  // Test 4 / Score specific inquiries for future or non-existent years (e.g. 2025)
-  if (cleanMsg.includes('2025') && (cleanMsg.includes('diem chuan') || cleanMsg.includes('bao nhieu diem') || cleanMsg.includes('lay bao nhieu') || cleanMsg.includes('diem'))) {
-    return 'CHẠM AI chưa có dữ liệu chính thức cho điểm chuẩn năm 2025 vì kỳ thi và xét tuyển chưa diễn ra. Bạn nên theo dõi cổng tuyển sinh chính thức của trường hoặc Cổng thông tin tuyển sinh Bộ GD&ĐT để cập nhật đề án mới nhất.\n\n*Gợi ý:* Bạn có thể tham khảo điểm chuẩn chính thức các năm 2024, 2023 đã có trong database của CHẠM VIỆC!';
+  // 2025 Statistics & Admission Scheme inquiry
+  if (
+    cleanMsg.includes('2025') &&
+    (cleanMsg.includes('thong ke') ||
+      cleanMsg.includes('nganh') ||
+      cleanMsg.includes('de an') ||
+      cleanMsg.includes('phuong an') ||
+      cleanMsg.includes('to hop') ||
+      cleanMsg.includes('tin hoc') ||
+      cleanMsg.includes('xet tuyen'))
+  ) {
+    const records2025 = ADMISSION_RECORDS.filter((r) => r.year === 2025);
+    const itRecords = records2025.filter(r => r.majorName.toLowerCase().includes('thông tin') || r.majorName.toLowerCase().includes('máy tính') || r.majorName.toLowerCase().includes('trí tuệ') || r.majorName.toLowerCase().includes('phần mềm') || r.majorName.toLowerCase().includes('dữ liệu') || r.majorName.toLowerCase().includes('điều khiển'));
+    const econRecords = records2025.filter(r => r.majorName.toLowerCase().includes('marketing') || r.majorName.toLowerCase().includes('logistics') || r.majorName.toLowerCase().includes('kinh doanh') || r.majorName.toLowerCase().includes('quản trị') || r.majorName.toLowerCase().includes('thương mại'));
+    const healthRecords = records2025.filter(r => r.majorName.toLowerCase().includes('y khoa') || r.majorName.toLowerCase().includes('dược'));
+    const otherRecords = records2025.filter(r => !itRecords.includes(r) && !econRecords.includes(r) && !healthRecords.includes(r));
+
+    const itList = itRecords.map((r, i) => `| ${i + 1} | **${r.majorName}** | ${r.universityName} | ${r.subjectCombination} | **${r.cutoffScore}** | ${r.method} |`).join('\n');
+    const econList = econRecords.map((r, i) => `| ${i + 1} | **${r.majorName}** | ${r.universityName} | ${r.subjectCombination} | **${r.cutoffScore}** | ${r.method} |`).join('\n');
+    const healthList = healthRecords.map((r, i) => `| ${i + 1} | **${r.majorName}** | ${r.universityName} | ${r.subjectCombination} | **${r.cutoffScore}** | ${r.method} |`).join('\n');
+    const otherList = otherRecords.map((r, i) => `| ${i + 1} | **${r.majorName}** | ${r.universityName} | ${r.subjectCombination} | **${r.cutoffScore}** | ${r.method} |`).join('\n');
+
+    return `### 📊 Báo cáo Thống kê Toàn diện Tuyển sinh Năm 2025 (Chương trình GDPT 2018 mới)
+
+Hệ thống CHẠM VIỆC hiện đã tổng hợp và xác minh chính thức **${records2025.length} ngành đào tạo** từ các trường đại học hàng đầu trên cả 3 miền đã ban hành phương án tuyển sinh 2025:
+
+#### 1. Khối Công nghệ thông tin, Trí tuệ nhân tạo & Kỹ thuật (${itRecords.length} ngành)
+| STT | Ngành tuyển sinh 2025 | Cơ sở đào tạo | Tổ hợp môn mới | Sàn đề án (Thang 30) | Phương thức xét tuyển |
+|---|---|---|---|---|---|
+${itList}
+
+#### 2. Khối Kinh tế, Kinh doanh & Quản trị (${econRecords.length} ngành)
+| STT | Ngành tuyển sinh 2025 | Cơ sở đào tạo | Tổ hợp môn mới | Sàn đề án (Thang 30) | Phương thức xét tuyển |
+|---|---|---|---|---|---|
+${econList}
+
+#### 3. Khối Y Dược & Khoa học Sức khỏe (${healthRecords.length} ngành)
+| STT | Ngành tuyển sinh 2025 | Cơ sở đào tạo | Tổ hợp môn mới | Sàn đề án (Thang 30) | Phương thức xét tuyển |
+|---|---|---|---|---|---|
+${healthList}
+
+#### 4. Khối Sư phạm, Xã hội, Luật & Nông nghiệp (${otherRecords.length} ngành)
+| STT | Ngành tuyển sinh 2025 | Cơ sở đào tạo | Tổ hợp môn mới | Sàn đề án (Thang 30) | Phương thức xét tuyển |
+|---|---|---|---|---|---|
+${otherList}
+
+---
+💡 **3 Điểm mới đột phá của mùa tuyển sinh năm 2025:**
+1. **Môn Tin học lần đầu tiên xuất hiện chính thức:** Các tổ hợp mới như **K01 (Toán, Vật lý, Tin học)**, **Toán - Tin - Tiếng Anh** được áp dụng tại ĐH Bách khoa Hà Nội, ĐH Công nghệ ĐHQGHN, ĐH Ngoại thương, ĐH Kinh tế Quốc dân, ĐH Bách khoa Đà Nẵng, ĐH CNTT ĐHQG-HCM, ĐH Thương mại, ĐH Cần Thơ.
+2. **Kỳ thi tốt nghiệp THPT 2+2:** Thí sinh chỉ thi 4 môn (Toán, Văn bắt buộc + 2 môn tự chọn), giảm tải áp lực ôn tập.
+3. **Mức điểm trên là Điểm sàn nhận hồ sơ:** Đây là ngưỡng bảo đảm chất lượng đầu vào được trường quy định trong đề án 2025. Điểm trúng tuyển chính thức sẽ được công bố sau khi có kết quả kỳ thi tốt nghiệp 2025.`;
+  }
+
+  // Score specific inquiries for future 2025 when asking for exact cutoff
+  if (cleanMsg.includes('2025') && (cleanMsg.includes('diem chuan') || cleanMsg.includes('bao nhieu diem') || cleanMsg.includes('lay bao nhieu'))) {
+    return 'Kỳ thi tốt nghiệp THPT 2025 chưa diễn ra nên các trường đại học chưa công bố điểm chuẩn trúng tuyển chính thức năm 2025.\n\nTuy nhiên, CHẠM VIỆC đã cập nhật **Phương án tuyển sinh và Mức điểm sàn nhận hồ sơ năm 2025** của các trường (ví dụ: ĐH Bách khoa Hà Nội ngành IT1 lấy sàn 24.00 tổ hợp K01 Toán-Lý-Tin, ĐH Ngoại thương ngành Logistics lấy sàn 24.00, ĐH Kinh tế Quốc dân lấy sàn 23.00...). Bạn có thể chọn mục **"Năm dữ liệu: 2025"** trong bộ lọc để xem chi tiết từng ngành!';
   }
 
   // Marketing vs Digital Marketing comparison (Section 4)
@@ -293,7 +346,8 @@ QUY TẮC CỐT LÕI (BẮT BUỘC TUÂN THỦ TUYỆT ĐỐI):
 1. ĐIỂM CHUẨN VÀ TUYỂN SINH:
    - CHỈ ĐƯỢC PHÉP TRẢ LỜI ĐIỂM CHUẨN VÀ THÔNG TIN TUYỂN SINH DỰA TRÊN DỮ LIỆU ĐÃ XÁC MINH DƯỚI ĐÂY.
    - Khi trả lời về điểm chuẩn, luôn nêu rõ: Năm dữ liệu, Điểm, Phương thức xét tuyển, Tổ hợp nếu có, và Nguồn dữ liệu chính thức.
-   - Nếu trong dữ liệu dưới đây KHÔNG CÓ thông tin trường/ngành/năm đó (ví dụ năm 2025 chưa công bố, hoặc trường chưa có trong database):
+   - ĐỐI VỚI NĂM 2025: Dữ liệu năm 2025 trong cơ sở dữ liệu là ĐỀ ÁN TUYỂN SINH CHÍNH THỨC VÀ ĐIỂM SÀN NHẬN HỒ SƠ THEO CHƯƠNG TRÌNH GDPT 2018 MỚI (chưa phải điểm chuẩn trúng tuyển cuối cùng vì kỳ thi tốt nghiệp 2025 chưa diễn ra). Khi học sinh hỏi về thống kê ngành 2025, hãy tổng hợp bảng các ngành, tổ hợp mới (đặc biệt là môn Tin học K01, Toán-Tin-Anh) và mức điểm sàn nhận hồ sơ kèm nguồn đề án từ database.
+   - Nếu trong dữ liệu dưới đây KHÔNG CÓ thông tin trường/ngành/năm đó:
      BẮT BUỘC PHẢI TRẢ LỜI NGUYÊN VĂN:
      "CHẠM AI chưa có dữ liệu chính thức cho thông tin này. Bạn nên kiểm tra thêm tại website tuyển sinh chính thức của trường."
    - TUYỆT ĐỐI KHÔNG TỰ BỊA ĐIỂM CHUẨN, KHÔNG SUY ĐOÁN ĐIỂM.

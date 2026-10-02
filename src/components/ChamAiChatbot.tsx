@@ -59,6 +59,7 @@ export const ChamAiChatbot: React.FC<ChamAiChatbotProps> = ({
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const quickPrompts = [
+    { label: '🚀 Thống kê tuyển sinh 2025', text: 'Hãy thống kê chi tiết các ngành và phương án tuyển sinh năm 2025 theo chương trình mới trong hệ thống?' },
     { label: '🎯 Tôi hợp nghề gì?', text: 'Theo bạn với hồ sơ sở thích và năng lực của tôi thì tôi hợp nghề gì? Hãy phân tích theo cấu trúc Nghề phù hợp, Vì sao phù hợp, Ngành học, Trường tham khảo và Điều cần cân nhắc.' },
     { label: '🎓 Tìm trường cho tôi', text: 'Gợi ý các trường đại học đào tạo tốt phù hợp với khu vực và nguyện vọng của tôi?' },
     { label: '📊 Điểm của tôi có thể tham khảo trường nào?', text: `Với mức điểm dự kiến khoảng ${profile.estimatedScore || 25} điểm, tôi có thể tham khảo những trường và ngành nào trong cơ sở dữ liệu chính thức?` },
