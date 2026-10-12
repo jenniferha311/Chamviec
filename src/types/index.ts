@@ -145,6 +145,7 @@ export interface AdmissionRecord {
   program?: string; // alias for programName
   year: number; // 2024, 2023, 2022
   method: string; // "Điểm thi tốt nghiệp THPT", "Đánh giá năng lực ĐHQG", "Xét học bạ THPT", v.v.
+  methodName?: string; // alias for method
   admissionMethods?: string[];
   subjectCombination: string; // "A00 (Toán, Lý, Hóa)", "D01 (Toán, Văn, Anh)", v.v.
   subjectCombinations?: string[];
@@ -157,6 +158,7 @@ export interface AdmissionRecord {
   tuition?: string; // alias
   sourceUrl: string;
   sourceDocument: string;
+  source?: string; // alias for sourceDocument
   verifiedDate: string;
   isVerifiedOfficial: boolean; // true = nguồn đề án / cổng thông tin trường
   isDemoData?: boolean;

@@ -18,6 +18,19 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
+// CORS configuration (crucial for cross-origin preview, iframes, mobile clients, and Vercel)
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  next();
+});
+
+import { processChamAiChat } from './src/server/chamAiService.ts';
+
 const apiKey = process.env.GEMINI_API_KEY;
 const ai = apiKey
   ? new GoogleGenAI({
@@ -326,100 +339,41 @@ Mình có thể hỗ trợ bạn tra cứu chi tiết về:
 Bạn có thể chọn một trong các câu hỏi gợi ý bên dưới hoặc hỏi thêm chi tiết nhé!`;
 }
 
-// MAIN CHATBOT ENDPOINT: /api/cham-ai
-app.post('/api/cham-ai', async (req, res) => {
+// MAIN CHATBOT ENDPOINT: /api/cham-ai & /api/cham-ai/chat
+app.post(['/api/cham-ai', '/api/cham-ai/chat'], async (req, res) => {
   try {
-    const { message, profile, currentContext } = req.body;
+    const { message, profile, currentContext, chatHistory } = req.body;
 
     if (!message || !message.trim()) {
-      return res.status(400).json({ error: 'Message is required' });
+      return res.status(400).json({
+        success: false,
+        error: 'EMPTY_MESSAGE',
+        errorMessage: 'Tin nhắn không được để trống.',
+        canRetry: false,
+      });
     }
 
-    if (!ai) {
-      const offlineReply = generateSmartOfflineReply(message, profile);
-      return res.json({ reply: offlineReply, isOfflineMode: true });
-    }
-
-    const systemInstruction = `Bạn là "CHẠM AI – Trợ lý hướng nghiệp" trong ứng dụng "CHẠM VIỆC – Chạm nghề, chọn ngành, mở tương lai" dành cho học sinh THPT (lớp 10–12) tại Việt Nam.
-
-QUY TẮC CỐT LÕI (BẮT BUỘC TUÂN THỦ TUYỆT ĐỐI):
-1. ĐIỂM CHUẨN VÀ TUYỂN SINH:
-   - CHỈ ĐƯỢC PHÉP TRẢ LỜI ĐIỂM CHUẨN VÀ THÔNG TIN TUYỂN SINH DỰA TRÊN DỮ LIỆU ĐÃ XÁC MINH DƯỚI ĐÂY.
-   - Khi trả lời về điểm chuẩn, luôn nêu rõ: Năm dữ liệu, Điểm, Phương thức xét tuyển, Tổ hợp nếu có, và Nguồn dữ liệu chính thức.
-   - ĐỐI VỚI NĂM 2025: Dữ liệu năm 2025 trong cơ sở dữ liệu là ĐỀ ÁN TUYỂN SINH CHÍNH THỨC VÀ ĐIỂM SÀN NHẬN HỒ SƠ THEO CHƯƠNG TRÌNH GDPT 2018 MỚI (chưa phải điểm chuẩn trúng tuyển cuối cùng vì kỳ thi tốt nghiệp 2025 chưa diễn ra). Khi học sinh hỏi về thống kê ngành 2025, hãy tổng hợp bảng các ngành, tổ hợp mới (đặc biệt là môn Tin học K01, Toán-Tin-Anh) và mức điểm sàn nhận hồ sơ kèm nguồn đề án từ database.
-   - Nếu trong dữ liệu dưới đây KHÔNG CÓ thông tin trường/ngành/năm đó:
-     BẮT BUỘC PHẢI TRẢ LỜI NGUYÊN VĂN:
-     "CHẠM AI chưa có dữ liệu chính thức cho thông tin này. Bạn nên kiểm tra thêm tại website tuyển sinh chính thức của trường."
-   - TUYỆT ĐỐI KHÔNG TỰ BỊA ĐIỂM CHUẨN, KHÔNG SUY ĐOÁN ĐIỂM.
-
-2. KHI HỌC SINH HỎI ĐỊNH HƯỚNG ("Em nên học gì?", "Em hợp nghề gì?", "Tư vấn cho em..."):
-   - Phải sử dụng toàn bộ thông tin trong Hồ sơ của học sinh (Holland/RIASEC, môn học thế mạnh, sở thích, năng lực, giá trị nghề, vị trí địa lý, điểm dự kiến...).
-   - Bắt đầu bằng: "Dựa trên hồ sơ của bạn..."
-   - Cấu trúc bắt buộc gồm 5 phần:
-     ### Nghề phù hợp
-     ### Vì sao phù hợp
-     ### Ngành học tương ứng
-     ### Trường có thể tham khảo
-     ### Điều cần cân nhắc
-   - Giọng điệu khuyến khích, gợi mở, tôn trọng quyền tự quyết của học sinh, không áp đặt.
-
-3. KHI HỌC SINH YÊU CẦU SO SÁNH:
-   - So sánh 2 ngành nghề (ví dụ: Marketing vs Digital Marketing; KHMT vs CNTT):
-     Trả về BẢNG MARKDOWN rõ ràng gồm các tiêu chí: Học gì | Công việc | Kỹ năng | Môi trường làm việc | Phù hợp với RIASEC | Ngành đào tạo.
-   - So sánh 2 trường đại học:
-     Dựa trên dữ liệu chính thức trong database để lập bảng so sánh: Ngành | Chương trình | Địa điểm | Điểm chuẩn theo năm | Phương thức xét tuyển | Học phí nếu có.
-     KHÔNG tự tuyên bố trường nào "tốt hơn" nếu không có tiêu chí định lượng rõ ràng.
-
-4. VĂN PHONG:
-   - Thân thiện, gần gũi với học sinh cấp 3 Việt Nam, súc tích, định dạng Markdown đẹp, dễ đọc trên điện thoại.
-
---- CƠ SỞ DỮ LIỆU CHÍNH THỨC CỦA ỨNG DỤNG ---
-${DATABASE_GROUNDING_BRIEF}
-`;
-
-    const profileContext = profile
-      ? `Hồ sơ học sinh:
-- Khối lớp: ${profile.grade || 'chưa xác định'}
-- Môn học thế mạnh: ${(profile.favoriteSubjects || []).join(', ') || 'Chưa cung cấp'}
-- Năng lực học tập: ${(profile.academicStrengths || []).join(', ') || 'Chưa cung cấp'}
-- Hoạt động / Sở thích: ${(profile.activities || []).join(', ') || 'Chưa cung cấp'}
-- Kết quả RIASEC: Top nhóm ${(profile.topRiasec || []).join(', ') || 'Chưa làm trắc nghiệm'} (Điểm chi tiết: R=${profile.riasecScores?.R || 0}, I=${profile.riasecScores?.I || 0}, A=${profile.riasecScores?.A || 0}, S=${profile.riasecScores?.S || 0}, E=${profile.riasecScores?.E || 0}, C=${profile.riasecScores?.C || 0})
-- Giá trị nghề nghiệp ưu tiên: ${(profile.priorityValues || []).join(', ') || 'Chưa chọn'}
-- Ngành quan tâm: ${(profile.savedMajors || []).join(', ') || 'Chưa lưu'}
-- Nghề quan tâm: ${(profile.savedCareers || []).join(', ') || 'Chưa lưu'}
-- Vị trí địa lý mong muốn: ${(profile.preferredRegions || []).join(', ') || 'Toàn quốc'} (Tỉnh/Thành: ${(profile.preferredProvinces || []).join(', ') || 'Tất cả'})
-- Khả năng tài chính / Học phí: ${profile.budgetRange || 'Bình thường'} (Quan tâm học bổng: ${profile.scholarshipInterest ? 'Có' : 'Không'})
-- Điểm thi tốt nghiệp THPT dự kiến: ${profile.estimatedScore || 'Chưa có'} điểm
-- Tổ hợp xét tuyển dự kiến: ${(profile.targetCombinations || []).join(', ') || 'Chưa chọn'}`
-      : 'Học sinh chưa tạo hồ sơ.';
-
-    const userPrompt = `[NGỮ CẢNH HỒ SƠ HỌC SINH HIỆN TẠI]
-${profileContext}
-[NGỮ CẢNH MÀN HÌNH ĐANG XEM]
-${currentContext || 'Trang chủ'}
-
-[CÂU HỎI CỦA HỌC SINH]
-"${message}"
-
-Hãy trả lời học sinh với vai trò "CHẠM AI – Trợ lý hướng nghiệp" tuân thủ tuyệt đối các nguyên tắc đã quy định.`;
-
-    const response = await ai.models.generateContent({
-      model: 'gemini-3.8-flash',
-      contents: userPrompt,
-      config: {
-        systemInstruction,
-        temperature: 0.4,
-      },
+    const result = await processChamAiChat({
+      message,
+      profile,
+      currentContext,
+      chatHistory,
     });
 
-    const reply = response.text || generateSmartOfflineReply(message, profile);
-    return res.json({ reply, isOfflineMode: false });
+    if (!result.success) {
+      return res.status(result.error === 'EMPTY_MESSAGE' ? 400 : 500).json(result);
+    }
+
+    return res.json(result);
   } catch (err: any) {
-    console.error('Error generating CHẠM AI response:', err);
-    const fallbackReply = generateSmartOfflineReply(req.body?.message || '', req.body?.profile);
-    return res.json({
-      reply: fallbackReply,
-      isOfflineMode: true,
+    console.error('Error in /api/cham-ai handler:', err);
+    return res.status(500).json({
+      success: false,
+      error: 'SERVER_EXCEPTION',
+      errorMessage: 'Đã có sự cố trong quá trình kết nối với máy chủ AI.',
+      errorDetail: err?.message || String(err),
+      canRetry: true,
+      isOfflineMode: false,
     });
   }
 });
@@ -427,28 +381,22 @@ Hãy trả lời học sinh với vai trò "CHẠM AI – Trợ lý hướng ngh
 // Backward-compatible alias for existing endpoints
 app.post('/api/phuong-chat', async (req, res) => {
   try {
-    const { message, profile, currentContext } = req.body;
-    if (!ai) {
-      return res.json({
-        reply: generateSmartOfflineReply(message, profile),
-        isOfflineMode: true,
-      });
-    }
-
-    const response = await ai.models.generateContent({
-      model: 'gemini-3.8-flash',
-      contents: `Bối cảnh: Học sinh hỏi: "${message}". Ngữ cảnh: ${currentContext}. Hãy trả lời thân thiện, đúng dữ liệu tuyển sinh có căn cứ.`,
-      config: {
-        systemInstruction: 'Bạn là CHẠM AI – Trợ lý hướng nghiệp trong ứng dụng CHẠM VIỆC. Tuyệt đối không tự bịa điểm chuẩn. Nếu không có dữ liệu hãy nói chưa có.',
-        temperature: 0.4,
-      },
+    const { message, profile, currentContext, chatHistory } = req.body;
+    const result = await processChamAiChat({
+      message,
+      profile,
+      currentContext: currentContext || 'Tư vấn hướng nghiệp',
+      chatHistory,
     });
-
-    return res.json({ reply: response.text, isOfflineMode: false });
-  } catch (e) {
-    return res.json({
-      reply: generateSmartOfflineReply(req.body?.message || '', req.body?.profile),
-      isOfflineMode: true,
+    return res.json(result);
+  } catch (e: any) {
+    return res.status(500).json({
+      success: false,
+      error: 'SERVER_EXCEPTION',
+      errorMessage: 'Không thể kết nối đến máy chủ trợ lý.',
+      errorDetail: e?.message || String(e),
+      canRetry: true,
+      isOfflineMode: false,
     });
   }
 });

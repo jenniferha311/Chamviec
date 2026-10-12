@@ -1,4 +1,4 @@
-import { AdmissionRecord, University } from '../types';
+import { AdmissionRecord, University } from '../types/index.ts';
 
 export const UNIVERSITIES_DATA: University[] = [
   // HÀ NỘI & MIỀN BẮC

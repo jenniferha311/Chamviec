@@ -1,4 +1,4 @@
-import { Career } from '../types';
+import { Career } from '../types/index.ts';
 
 export const CAREERS_DATA: Career[] = [
   {

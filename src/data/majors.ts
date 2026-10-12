@@ -1,4 +1,4 @@
-import { Major, MajorCategory } from '../types';
+import { Major, MajorCategory } from '../types/index.ts';
 
 export const MAJOR_CATEGORIES: MajorCategory[] = [
   { id: 'all', name: 'Tất cả các nhóm ngành', description: 'Toàn bộ danh mục ngành đào tạo', iconName: 'Layers' },
